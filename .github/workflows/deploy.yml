@@ -21,9 +21,11 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
 
-      - name: Make Gradlew Executable
+      - name: Generate and Fix Gradle Wrapper
         run: |
+          # If gradlew is missing, install gradle and generate the wrapper
           if [ ! -f gradlew ]; then
+            sudo apt-get update && sudo apt-get install -y gradle
             gradle wrapper
           fi
           chmod +x gradlew
