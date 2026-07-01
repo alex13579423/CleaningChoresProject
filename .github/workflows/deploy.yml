@@ -18,24 +18,15 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Setup Gradle
+      - name: Build Web Target
         uses: gradle/actions/setup-gradle@v3
         with:
           gradle-version: 8.5
-
-      - name: Build Web Target
-        run: |
-          if [ -f gradlew ]; then
-            chmod +x gradlew
-            ./gradlew wasmJsBrowserDistribution
-          else
-            echo "Gradlew not found, using gradle-8.5 from setup-gradle"
-            gradle wasmJsBrowserDistribution
-          fi
+          arguments: wasmJsBrowserDistribution
 
       - name: Prepare Deployment Folder
         run: |
-          mkdir deploy
+          mkdir -p deploy
           cp -r build/dist/wasmJs/productionExecutable/* deploy/
           cp -r web/* deploy/
 
