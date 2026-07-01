@@ -27,6 +27,8 @@ import com.example.myapp.ui.theme.*
 fun ScheduleScreen(
     schedule: Map<String, Map<String, List<String>>>?,
     people: List<Person>,
+    chores: List<Chore>,
+    priorityEnabled: Boolean,
     onGenerate: () -> Unit,
     onShare: () -> Unit,
     onUpdateSchedule: (Map<String, Map<String, List<String>>>) -> Unit
@@ -50,7 +52,7 @@ fun ScheduleScreen(
         }
 
         Column(modifier = Modifier.padding(16.dp).weight(1f)) {
-            if (schedule == null || schedule.isEmpty()) {
+            if (schedule.isNullOrEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
@@ -95,13 +97,18 @@ fun ScheduleScreen(
                     }
                 }
 
-                LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    items(CHORES) { chore ->
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    contentPadding = PaddingValues(bottom = 80.dp)
+                ) {
+                    val activeChores = chores.filter { it.isActive }
+                    items(activeChores) { chore ->
                         ChoreItem(
                             chore = chore,
                             assignedNames = schedule[currentDayKey]?.get(chore.id) ?: emptyList(),
                             isEditing = isEditing,
                             activePeople = people.filter { it.active },
+                            priorityEnabled = priorityEnabled,
                             onTogglePerson = { name ->
                                 val newDaySchedule = schedule[currentDayKey]?.toMutableMap() ?: mutableMapOf()
                                 val list = newDaySchedule[chore.id]?.toMutableList() ?: mutableListOf()

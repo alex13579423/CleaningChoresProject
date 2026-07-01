@@ -5,6 +5,7 @@ import android.content.Intent
 import com.example.myapp.R
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import androidx.core.content.edit
 
 class ChoreRepository(private val context: Context) {
     private val prefs = context.getSharedPreferences("duty_prefs", Context.MODE_PRIVATE)
@@ -21,7 +22,7 @@ class ChoreRepository(private val context: Context) {
     }
 
     fun saveSchedule(schedule: Map<String, Map<String, List<String>>>) {
-        prefs.edit().putString("schedule", gson.toJson(schedule)).apply()
+        prefs.edit { putString("schedule", gson.toJson(schedule)) }
     }
 
     fun getSchedule(): Map<String, Map<String, List<String>>>? {
@@ -30,26 +31,47 @@ class ChoreRepository(private val context: Context) {
         return gson.fromJson(json, type)
     }
 
-    fun generateWeek(people: List<Person>): Map<String, Map<String, List<String>>> {
+    fun saveChores(chores: List<Chore>) {
+        prefs.edit { putString("chores", gson.toJson(chores)) }
+    }
+
+    fun getChores(): List<Chore> {
+        val json = prefs.getString("chores", null) ?: return DEFAULT_CHORES
+        val type = object : TypeToken<List<Chore>>() {}.type
+        return gson.fromJson(json, type)
+    }
+
+    fun savePriorityEnabled(enabled: Boolean) {
+        prefs.edit { putBoolean("priority_enabled", enabled) }
+    }
+
+    fun isPriorityEnabled(): Boolean {
+        return prefs.getBoolean("priority_enabled", true)
+    }
+
+    fun generateWeek(people: List<Person>, chores: List<Chore>, usePriorities: Boolean = true): Map<String, Map<String, List<String>>> {
         val activePeople = people.filter { it.active }
-        if (activePeople.isEmpty()) return emptyMap()
+        val activeChores = chores.filter { it.isActive }
+        if (activePeople.isEmpty() || activeChores.isEmpty()) return emptyMap()
 
         val newSchedule = mutableMapOf<String, MutableMap<String, MutableList<String>>>()
         val totalAssignments = activePeople.associate { it.name to 0 }.toMutableMap()
         val taskHistory = activePeople.associate { it.name to mutableMapOf<String, Int>() }.toMutableMap()
 
         activePeople.forEach { p ->
-            CHORES.forEach { chore -> taskHistory[p.name]!![chore.id] = 0 }
+            activeChores.forEach { chore -> taskHistory[p.name]!![chore.id] = 0 }
         }
 
-        val activeDaysForLowPriority = CHORES.filter { it.priority == Priority.LOW }.associate { chore ->
+        val activeDaysForLowPriority = activeChores.filter { 
+            if (usePriorities) it.priority == Priority.LOW else false 
+        }.associate { chore ->
             val numDays = (1..2).random()
             chore.id to DAY_KEYS.shuffled().take(numDays)
         }
 
         DAY_KEYS.forEach { day ->
             val daySchedule = mutableMapOf<String, MutableList<String>>()
-            CHORES.forEach { daySchedule[it.id] = mutableListOf() }
+            activeChores.forEach { daySchedule[it.id] = mutableListOf() }
             
             val available = activePeople.filter { day !in it.unavailableDays }.toMutableList()
             available.shuffle()
@@ -68,20 +90,24 @@ class ChoreRepository(private val context: Context) {
 
             // 1. Mandatory Gendered Tasks
             val malePool = available.filter { it.gender == Gender.MALE }
-            pickPerson(malePool, "toilet_m")?.let {
-                daySchedule["toilet_m"]!!.add(it.name)
-                available.remove(it)
+            if (activeChores.any { it.id == "toilet_m" }) {
+                pickPerson(malePool, "toilet_m")?.let {
+                    daySchedule["toilet_m"]!!.add(it.name)
+                    available.remove(it)
+                }
             }
 
             val femalePool = available.filter { it.gender == Gender.FEMALE }
-            pickPerson(femalePool, "toilet_f")?.let {
-                daySchedule["toilet_f"]!!.add(it.name)
-                available.remove(it)
+            if (activeChores.any { it.id == "toilet_f" }) {
+                pickPerson(femalePool, "toilet_f")?.let {
+                    daySchedule["toilet_f"]!!.add(it.name)
+                    available.remove(it)
+                }
             }
 
             // 2. Primary Assignments
-            CHORES.filter { it.id != "toilet_m" && it.id != "toilet_f" }.forEach { chore ->
-                if (chore.priority == Priority.LOW && day !in (activeDaysForLowPriority[chore.id] ?: emptyList())) {
+            activeChores.filter { it.id != "toilet_m" && it.id != "toilet_f" }.forEach { chore ->
+                if (usePriorities && chore.priority == Priority.LOW && day !in (activeDaysForLowPriority[chore.id] ?: emptyList())) {
                     return@forEach
                 }
                 
@@ -94,10 +120,16 @@ class ChoreRepository(private val context: Context) {
             // 3. Redistribute Idle People
             while (available.isNotEmpty()) {
                 var assignedInThisLoop = false
-                for (chore in CHORES.sortedByDescending { it.priority }) {
+                val sortedChores = if (usePriorities) {
+                    activeChores.sortedByDescending { it.priority }
+                } else {
+                    activeChores.shuffled()
+                }
+
+                for (chore in sortedChores) {
                     if (available.isEmpty()) break
                     
-                    if (chore.priority == Priority.LOW && day !in (activeDaysForLowPriority[chore.id] ?: emptyList())) {
+                    if (usePriorities && chore.priority == Priority.LOW && day !in (activeDaysForLowPriority[chore.id] ?: emptyList())) {
                         continue
                     }
 
@@ -121,15 +153,16 @@ class ChoreRepository(private val context: Context) {
         return newSchedule
     }
 
-    fun shareSchedule(schedule: Map<String, Map<String, List<String>>>) {
+    fun shareSchedule(schedule: Map<String, Map<String, List<String>>>, chores: List<Chore>) {
         var text = context.getString(R.string.share_header)
+        val activeChores = chores.filter { it.isActive }
 
         DAY_KEYS.forEach { dayKey ->
             text += context.getString(R.string.share_day_format, DAYS_HE[dayKey])
             val dayData = schedule[dayKey] ?: return@forEach
             var tasksFound = false
 
-            CHORES.forEach { chore ->
+            activeChores.forEach { chore ->
                 val assigned = dayData[chore.id]
                 if (!assigned.isNullOrEmpty()) {
                     text += context.getString(R.string.share_task_format, chore.label, assigned.joinToString(", "))

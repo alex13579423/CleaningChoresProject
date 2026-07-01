@@ -1,5 +1,6 @@
 package com.example.myapp.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -7,9 +8,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.myapp.R
@@ -28,7 +32,10 @@ fun PersonFormBottomSheet(
     var unavailableDays by remember { mutableStateOf(person?.unavailableDays ?: emptyList<String>()) }
 
     ModalBottomSheet(
-        onDismissRequest = onDismiss,
+        onDismissRequest = {
+            if (name.isNotBlank()) onSave(name, gender, unavailableDays)
+            onDismiss()
+        },
         sheetState = rememberModalBottomSheetState(),
         containerColor = MaterialTheme.colorScheme.surface
     ) {
@@ -38,7 +45,7 @@ fun PersonFormBottomSheet(
                 .fillMaxWidth()
         ) {
             Text(
-                text = if (person == null) stringResource(R.string.add_person_title) else "עריכת משתתף",
+                text = if (person == null) stringResource(R.string.add_person_title) else stringResource(R.string.edit_person_title),
                 style = MaterialTheme.typography.titleLarge
             )
             
@@ -55,7 +62,7 @@ fun PersonFormBottomSheet(
 
             Spacer(Modifier.height(24.dp))
 
-            Text("מגדר", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.gender_label), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
             Row(
                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -78,26 +85,29 @@ fun PersonFormBottomSheet(
 
             Spacer(Modifier.height(24.dp))
 
-            Text("ימי היעדרות (לא זמין)", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.availability_hint), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
             Spacer(Modifier.height(8.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                DAY_KEYS.forEach { dayKey ->
-                    val isSelected = dayKey in unavailableDays
-                    FilterChip(
-                        selected = isSelected,
-                        onClick = {
-                            unavailableDays = if (isSelected) unavailableDays - dayKey else unavailableDays + dayKey
-                        },
-                        label = { Text(DAYS_HE[dayKey]?.take(1) ?: "", fontWeight = FontWeight.Bold) },
-                        shape = RoundedCornerShape(12.dp),
-                        colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = UnavailableBackground,
-                            selectedLabelColor = UnavailableText
+            
+            CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    DAY_KEYS.forEach { dayKey ->
+                        val isSelected = dayKey in unavailableDays
+                        FilterChip(
+                            selected = isSelected,
+                            onClick = {
+                                unavailableDays = if (isSelected) unavailableDays - dayKey else unavailableDays + dayKey
+                            },
+                            label = { Text(DAYS_HE_SHORT[dayKey] ?: "", fontWeight = FontWeight.Bold) },
+                            shape = RoundedCornerShape(12.dp),
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = UnavailableBackground,
+                                selectedLabelColor = UnavailableText
+                            )
                         )
-                    )
+                    }
                 }
             }
 
@@ -109,7 +119,7 @@ fun PersonFormBottomSheet(
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
             ) {
-                Text("שמור", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                Text(stringResource(R.string.save_button), fontWeight = FontWeight.Bold, fontSize = 16.sp)
             }
         }
     }

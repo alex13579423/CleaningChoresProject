@@ -25,6 +25,7 @@ fun ChoreItem(
     assignedNames: List<String>,
     isEditing: Boolean,
     activePeople: List<Person>,
+    priorityEnabled: Boolean = true,
     onTogglePerson: (String) -> Unit
 ) {
     Card(
@@ -45,24 +46,26 @@ fun ChoreItem(
                         fontWeight = FontWeight.Bold
                     )
                     
-                    val (priorityTextRes, priorityColor) = when(chore.priority) {
-                        Priority.HIGH -> R.string.priority_hard to PriorityHigh
-                        Priority.MEDIUM -> R.string.priority_medium to PriorityMedium
-                        Priority.LOW -> R.string.priority_easy to PriorityLow
-                    }
-                    
-                    Surface(
-                        color = priorityColor.copy(alpha = 0.2f),
-                        shape = RoundedCornerShape(4.dp),
-                        modifier = Modifier.padding(top = 4.dp)
-                    ) {
-                        Text(
-                            text = stringResource(priorityTextRes),
-                            color = priorityColor,
-                            fontSize = 10.sp,
-                            modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
-                            fontWeight = FontWeight.Medium
-                        )
+                    if (priorityEnabled) {
+                        val (priorityTextRes, priorityColor) = when(chore.priority) {
+                            Priority.HIGH -> R.string.priority_hard to PriorityHigh
+                            Priority.MEDIUM -> R.string.priority_medium to PriorityMedium
+                            Priority.LOW -> R.string.priority_easy to PriorityLow
+                        }
+                        
+                        Surface(
+                            color = priorityColor.copy(alpha = 0.2f),
+                            shape = RoundedCornerShape(4.dp),
+                            modifier = Modifier.padding(top = 4.dp)
+                        ) {
+                            Text(
+                                text = stringResource(priorityTextRes),
+                                color = priorityColor,
+                                fontSize = 10.sp,
+                                modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
                     }
                 }
 
