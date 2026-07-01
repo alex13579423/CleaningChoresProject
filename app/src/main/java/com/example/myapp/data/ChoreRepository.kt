@@ -2,10 +2,11 @@ package com.example.myapp.data
 
 import android.content.Context
 import android.content.Intent
+import com.example.myapp.R
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
-class ChoreManager(private val context: Context) {
+class ChoreRepository(private val context: Context) {
     private val prefs = context.getSharedPreferences("duty_prefs", Context.MODE_PRIVATE)
     private val gson = Gson()
 
@@ -37,12 +38,10 @@ class ChoreManager(private val context: Context) {
         val totalAssignments = activePeople.associate { it.name to 0 }.toMutableMap()
         val taskHistory = activePeople.associate { it.name to mutableMapOf<String, Int>() }.toMutableMap()
 
-        // Initialize task history
         activePeople.forEach { p ->
             CHORES.forEach { chore -> taskHistory[p.name]!![chore.id] = 0 }
         }
 
-        // Determine occasional tasks days (1-2 times a week)
         val activeDaysForLowPriority = CHORES.filter { it.priority == Priority.LOW }.associate { chore ->
             val numDays = (1..2).random()
             chore.id to DAY_KEYS.shuffled().take(numDays)
@@ -52,7 +51,7 @@ class ChoreManager(private val context: Context) {
             val daySchedule = mutableMapOf<String, MutableList<String>>()
             CHORES.forEach { daySchedule[it.id] = mutableListOf() }
             
-            var available = activePeople.filter { day !in it.unavailableDays }.toMutableList()
+            val available = activePeople.filter { day !in it.unavailableDays }.toMutableList()
             available.shuffle()
 
             fun pickPerson(pool: List<Person>, taskId: String): Person? {
@@ -80,7 +79,7 @@ class ChoreManager(private val context: Context) {
                 available.remove(it)
             }
 
-            // 2. Primary Assignments (One person per task)
+            // 2. Primary Assignments
             CHORES.filter { it.id != "toilet_m" && it.id != "toilet_f" }.forEach { chore ->
                 if (chore.priority == Priority.LOW && day !in (activeDaysForLowPriority[chore.id] ?: emptyList())) {
                     return@forEach
@@ -114,7 +113,7 @@ class ChoreManager(private val context: Context) {
                         assignedInThisLoop = true
                     }
                 }
-                if (!assignedInThisLoop) break // Prevent infinite loop if leftovers can't be assigned
+                if (!assignedInThisLoop) break
             }
             newSchedule[day] = daySchedule
         }
@@ -123,36 +122,36 @@ class ChoreManager(private val context: Context) {
     }
 
     fun shareSchedule(schedule: Map<String, Map<String, List<String>>>) {
-        var text = "📋 *סידור תורנויות שבועי* 📋\n\n"
+        var text = context.getString(R.string.share_header)
 
         DAY_KEYS.forEach { dayKey ->
-            text += "*יום ${DAYS_HE[dayKey]}*\n"
+            text += context.getString(R.string.share_day_format, DAYS_HE[dayKey])
             val dayData = schedule[dayKey] ?: return@forEach
             var tasksFound = false
 
             CHORES.forEach { chore ->
                 val assigned = dayData[chore.id]
                 if (!assigned.isNullOrEmpty()) {
-                    text += "▫️ ${chore.label}: ${assigned.joinToString(", ")}\n"
+                    text += context.getString(R.string.share_task_format, chore.label, assigned.joinToString(", "))
                     tasksFound = true
                 } else if (chore.priority != Priority.LOW) {
-                    text += "▫️ ${chore.label}: _חסר_ ⚠️\n"
+                    text += context.getString(R.string.share_task_format, chore.label, context.getString(R.string.share_missing))
                     tasksFound = true
                 }
             }
 
-            if (!tasksFound) text += "_אין משימות ביום זה_\n"
+            if (!tasksFound) text += context.getString(R.string.share_no_tasks)
             text += "\n"
         }
 
-        text += "בהצלחה לכולם! 💪"
+        text += context.getString(R.string.share_footer)
 
         val sendIntent = Intent().apply {
             action = Intent.ACTION_SEND
             putExtra(Intent.EXTRA_TEXT, text)
             type = "text/plain"
         }
-        val shareIntent = Intent.createChooser(sendIntent, "שתף סידור עבודה")
+        val shareIntent = Intent.createChooser(sendIntent, context.getString(R.string.share_chooser_title))
         shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         context.startActivity(shareIntent)
     }

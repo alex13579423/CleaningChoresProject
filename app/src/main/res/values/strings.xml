@@ -1,3 +1,43 @@
 <resources>
-    <string name="app_name">לוח תורנויות 📅</string>
+    <string name="app_name">לוח תורנויות חכם 📅</string>
+
+    <!-- Navigation -->
+    <string name="nav_schedule">לוח</string>
+    <string name="nav_settings">הגדרות</string>
+
+    <!-- Schedule Screen -->
+    <string name="no_schedule_title">אין סידור כרגע 📅</string>
+    <string name="no_schedule_subtitle">הגרל שבוע חדש בהגדרות</string>
+    <string name="day_prefix">יום %s</string>
+    <string name="edit_assignment">ערוך</string>
+    <string name="save_assignment">שמור</string>
+    <string name="share_whatsapp">שתף סידור שבועי ל-WhatsApp 📱</string>
+    <string name="share_chooser_title">שתף סידור עבודה</string>
+    <string name="share_header">📋 *סידור תורנויות שבועי* 📋\n\n</string>
+    <string name="share_day_format">*יום %s*\n</string>
+    <string name="share_task_format">▫️ %1$s: %2$s\n</string>
+    <string name="share_missing">_חסר_ ⚠️</string>
+    <string name="share_no_tasks">_אין משימות ביום זה_\n</string>
+    <string name="share_footer">בהצלחה לכולם! 💪</string>
+
+    <!-- Settings Screen -->
+    <string name="add_person_title">הוספת משתתף חדש 👤</string>
+    <string name="person_name_hint">שם המשתתף</string>
+    <string name="gender_male">בן</string>
+    <string name="gender_female">בת</string>
+    <string name="add_button">הוסף לרשימה</string>
+    <string name="generate_button">🎲 הגרל סידור שבועי חדש</string>
+    <string name="people_list_title">רשימת משתתפים</string>
+    <string name="availability_hint">ימי היעדרות (לחץ לסימון):</string>
+
+    <!-- Chore Status -->
+    <string name="missing_male">אין בן פנוי</string>
+    <string name="missing_female">אין בת פנויה</string>
+    <string name="not_required_today">לא נדרש היום</string>
+    <string name="missing_personnel">חסר כוח אדם</string>
+
+    <!-- Priority Labels -->
+    <string name="priority_hard">(קשה)</string>
+    <string name="priority_medium">(בינוני)</string>
+    <string name="priority_easy">(קל)</string>
 </resources>
