@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">לוח תורנויות חכם 📅</string>
+    <string name="app_name">לוח תורנויות</string>
 
     <!-- Navigation -->
     <string name="nav_schedule">לוח</string>

@@ -31,10 +31,10 @@ data class Chore(
 val CHORES = listOf(
     Chore("toilet_m", "🚽 שירותים בנים", Priority.HIGH, Gender.MALE),
     Chore("toilet_f", "🚺 שירותים בנות", Priority.HIGH, Gender.FEMALE),
-    Chore("office", "🧹 ניקיון משרד", Priority.MEDIUM),
-    Chore("grass", "🌿 דשא", Priority.MEDIUM),
-    Chore("kitchen", "☕ מטבחון", Priority.LOW),
-    Chore("trash", "🗑️ פחים", Priority.LOW)
+    Chore("office", "🧹 ניקיון משרד", Priority.LOW),
+    Chore("grass", "🌿 דשא", Priority.LOW),
+    Chore("kitchen", "☕ מטבחון", Priority.MEDIUM),
+    Chore("trash", "🗑️ פחים", Priority.MEDIUM)
 )
 
 val DAYS_HE = mapOf(
