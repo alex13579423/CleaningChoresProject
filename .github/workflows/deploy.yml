@@ -21,17 +21,15 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
 
-      - name: Generate and Fix Gradle Wrapper
-        run: |
-          # If gradlew is missing, install gradle and generate the wrapper
-          if [ ! -f gradlew ]; then
-            sudo apt-get update && sudo apt-get install -y gradle
-            gradle wrapper
-          fi
-          chmod +x gradlew
-
       - name: Build Web Target
-        run: ./gradlew wasmJsBrowserDistribution
+        run: |
+          if [ -f gradlew ]; then
+            chmod +x gradlew
+            ./gradlew wasmJsBrowserDistribution
+          else
+            echo "Gradlew not found, using system gradle"
+            gradle wasmJsBrowserDistribution
+          fi
 
       - name: Prepare Deployment Folder
         run: |
