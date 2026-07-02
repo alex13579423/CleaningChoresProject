@@ -22,17 +22,19 @@ jobs:
         uses: gradle/actions/setup-gradle@v3
         with:
           gradle-version: 8.5
-          arguments: :app:wasmJsBrowserDistribution --no-configuration-cache --stacktrace
+          arguments: :app:wasmJsBrowserDistribution --no-configuration-cache --no-parallel --stacktrace
 
       - name: Prepare Deployment Folder
         run: |
           mkdir -p deploy
+          # Check for production output and copy to deploy folder
           if [ -d "app/build/dist/wasmJs/productionExecutable" ]; then
             cp -rv app/build/dist/wasmJs/productionExecutable/* deploy/
           else
-            echo "Build directory not found, searching..."
-            find app/build -name "*.js"
+            echo "Searching for build output..."
+            find app/build/dist -name "*.js" -exec cp -v {} deploy/ \;
           fi
+          # Copy static web assets (index.html, manifest.json, etc.)
           cp -rv web/* deploy/
 
       - name: Deploy to GitHub Pages
