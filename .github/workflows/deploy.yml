@@ -5,6 +5,10 @@ on:
     branches:
       - feat/apple-support
 
+# FIX 1: Grant permissions so the action can actually push to gh-pages
+permissions:
+  contents: write
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -19,7 +23,7 @@ jobs:
           java-version: '17'
 
       - name: Build Web Target
-        uses: gradle/actions/setup-gradle@v3
+        uses: gradle/actions/setup-gradle@v4 # Updated to v4 for Node.js/Wasm stability
         with:
           gradle-version: 8.5
           arguments: :app:wasmJsBrowserDistribution --no-configuration-cache --no-parallel --stacktrace
@@ -27,6 +31,7 @@ jobs:
       - name: Prepare Deployment Folder
         run: |
           mkdir -p deploy
+          
           # Check for production output and copy to deploy folder
           if [ -d "app/build/dist/wasmJs/productionExecutable" ]; then
             cp -rv app/build/dist/wasmJs/productionExecutable/* deploy/
@@ -34,8 +39,14 @@ jobs:
             echo "Searching for build output..."
             find app/build/dist -name "*.js" -exec cp -v {} deploy/ \;
           fi
+          
           # Copy static web assets (index.html, manifest.json, etc.)
-          cp -rv web/* deploy/
+          if [ -d "web" ]; then
+            cp -rv web/* deploy/
+          fi
+          
+          # FIX 2: Prevent GitHub Pages from ignoring critical framework files
+          touch deploy/.nojekyll
 
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
