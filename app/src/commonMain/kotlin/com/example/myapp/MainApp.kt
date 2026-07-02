@@ -80,11 +80,7 @@ fun MainApp(viewModel: ChoreViewModel) {
             }
         },
         floatingActionButton = {
-            AnimatedVisibility(
-                visible = selectedTab == 2,
-                enter = fadeIn(),
-                exit = fadeOut()
-            ) {
+            if (selectedTab == 2) {
                 Column(horizontalAlignment = Alignment.End) {
                     if (isFabExpanded) {
                         SmallFloatingActionButton(

@@ -5,7 +5,6 @@ on:
     branches:
       - feat/apple-support
 
-# FIX 1: Grant permissions so the action can actually push to gh-pages
 permissions:
   contents: write
 
@@ -28,19 +27,23 @@ jobs:
           gradle-version: 8.5
           
       - name: Execute Gradle Build
-        # VERIFIED LOCALLY: This command now succeeds with Kotlin 1.9.24 + Compose 1.6.11
-        run: gradle :app:wasmJsBrowserDistribution --no-configuration-cache --no-parallel --stacktrace
+        run: gradle wasmJsBrowserDistribution --no-configuration-cache --no-parallel --stacktrace
 
       - name: Prepare Deployment Folder
         run: |
           mkdir -p deploy
           
-          # Search for production output and copy to deploy folder
-          find . -path "*/build/dist/wasmJs/productionExecutable" -type d -exec cp -rv {}/. deploy/ \;
+          # Find the actual output directory
+          DIST_DIR=$(find . -path "*/build/dist/wasmJs/productionExecutable" -type d | head -n 1)
           
-          if [ -z "$(ls -A deploy)" ]; then
-             echo "Standard productionExecutable folder not found, searching for any .js output..."
-             find . -name "*.js" -path "*/build/dist/*" -exec cp -v {} deploy/ \;
+          if [ -n "$DIST_DIR" ]; then
+            echo "Found distribution directory at $DIST_DIR"
+            cp -rv $DIST_DIR/* deploy/
+          else
+            echo "Production executable not found, attempting fallback search..."
+            find . -name "*.js" -path "*/build/dist/*" -exec cp -v {} deploy/ \;
+            find . -name "*.wasm" -path "*/build/dist/*" -exec cp -v {} deploy/ \;
+            find . -name "*.mjs" -path "*/build/dist/*" -exec cp -v {} deploy/ \;
           fi
           
           # Copy static web assets (index.html, manifest.json, etc.)
@@ -48,7 +51,7 @@ jobs:
             cp -rv web/* deploy/
           fi
           
-          # Prevent GitHub Pages from ignoring critical framework files
+          # Ensure .nojekyll exists
           touch deploy/.nojekyll
 
       - name: Deploy to GitHub Pages
