@@ -21,14 +21,18 @@ jobs:
       - name: Build Web Target
         uses: gradle/actions/setup-gradle@v3
         with:
-          gradle-version: 8.2
-          arguments: :app:wasmJsBrowserDistribution --no-configuration-cache --no-parallel --stacktrace
+          gradle-version: 8.5
+          arguments: :app:wasmJsBrowserDistribution --no-configuration-cache --stacktrace
 
       - name: Prepare Deployment Folder
         run: |
           mkdir -p deploy
-          # Note: Adjust path if build directory differs
-          cp -rv app/build/dist/wasmJs/productionExecutable/* deploy/ || cp -rv build/dist/wasmJs/productionExecutable/* deploy/
+          if [ -d "app/build/dist/wasmJs/productionExecutable" ]; then
+            cp -rv app/build/dist/wasmJs/productionExecutable/* deploy/
+          else
+            echo "Build directory not found, searching..."
+            find app/build -name "*.js"
+          fi
           cp -rv web/* deploy/
 
       - name: Deploy to GitHub Pages
