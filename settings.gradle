@@ -10,6 +10,16 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        // Essential for Kotlin/Wasm to find Node.js
+        ivy {
+            url = "https://nodejs.org/dist"
+            patternLayout {
+                artifact("v[revision]/[artifact]-[revision]-[classifier].[ext]")
+            }
+            metadataSources {
+                artifact()
+            }
+        }
     }
 }
 rootProject.name = "CleaningChoresProject"
