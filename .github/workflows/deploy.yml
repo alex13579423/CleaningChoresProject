@@ -22,13 +22,14 @@ jobs:
         uses: gradle/actions/setup-gradle@v3
         with:
           gradle-version: 8.2
-          arguments: :app:wasmJsBrowserDistribution --stacktrace
+          arguments: :app:wasmJsBrowserDistribution --no-configuration-cache --no-parallel --stacktrace
 
       - name: Prepare Deployment Folder
         run: |
           mkdir -p deploy
-          cp -r app/build/dist/wasmJs/productionExecutable/* deploy/
-          cp -r web/* deploy/
+          # Note: Adjust path if build directory differs
+          cp -rv app/build/dist/wasmJs/productionExecutable/* deploy/ || cp -rv build/dist/wasmJs/productionExecutable/* deploy/
+          cp -rv web/* deploy/
 
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
