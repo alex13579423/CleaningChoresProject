@@ -7,20 +7,27 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#6750A4">
     <style>
-        body {
+        body, html {
             margin: 0;
             padding: 0;
+            width: 100%;
+            height: 100%;
             background-color: #ffffff;
+            overflow: hidden;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            overflow: hidden;
         }
-        #app { width: 100%; height: 100%; }
+        canvas#app {
+            width: 100%;
+            height: 100%;
+            outline: none;
+            user-select: none;
+            -webkit-user-select: none;
+        }
 
-        /* Loading indicator while Wasm is starting */
         #loading {
+            position: absolute;
             font-family: sans-serif;
             text-align: center;
             direction: rtl;
@@ -28,11 +35,11 @@
     </style>
 </head>
 <body>
-    <div id="loading">טוען את האפליקציה...</div>
-    <div id="app"></div>
+    <div id="loading">מתחיל את האפליקציה...</div>
+    <!-- Note: Must be a canvas element for CanvasBasedWindow -->
+    <canvas id="app"></canvas>
 
-    <script src="skiko.mjs" type="module"></script>
-    <script src="composeApp.js" type="module"></script>
+    <script src="composeApp.js"></script>
 
     <script>
         if ('serviceWorker' in navigator) {
@@ -41,14 +48,11 @@
             });
         }
 
-        // Hide loading once app is mounted
-        const observer = new MutationObserver((mutations) => {
-            if (document.getElementById('app').children.length > 0) {
-                document.getElementById('loading').style.display = 'none';
-                observer.disconnect();
-            }
-        });
-        observer.observe(document.getElementById('app'), { childList: true });
+        // Safety check: remove loading if app doesn't start in 10s
+        setTimeout(() => {
+            const loader = document.getElementById('loading');
+            if (loader) loader.innerText = "טוען... (אם זה לוקח זמן רב, נסה לרענן)";
+        }, 10000);
     </script>
 </body>
 </html>
