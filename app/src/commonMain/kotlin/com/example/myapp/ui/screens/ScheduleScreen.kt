@@ -74,7 +74,7 @@ fun ScheduleScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = AppStrings.day_prefix.format(DAYS_HE[currentDayKey] ?: ""),
+                        text = "יום ${DAYS_HE[currentDayKey] ?: ""}",
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.ExtraBold,
                         color = MaterialTheme.colorScheme.primary

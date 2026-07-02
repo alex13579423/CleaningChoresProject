@@ -36,6 +36,7 @@ kotlin {
             implementation(compose.ui)
             implementation(compose.components.resources)
             implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
+            implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.5.0")
         }
         androidMain.dependencies {
             implementation("androidx.activity:activity-compose:1.8.2")

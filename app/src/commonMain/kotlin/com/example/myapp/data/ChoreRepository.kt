@@ -10,16 +10,6 @@ class ChoreRepository(
 ) {
     private val json = Json { ignoreUnknownKeys = true }
 
-    // Hardcoded strings for common logic to avoid R.string dependency in multiplatform logic
-    private val HE_STRINGS = mapOf(
-        "share_header" to "📋 סידור עבודה לשבוע הקרוב:\n\n",
-        "share_day_format" to "*יום %s*:\n",
-        "share_task_format" to "  - %s: %s\n",
-        "share_missing" to "⚠️ חסר תורן!",
-        "share_no_tasks" to "  (אין משימות היום)\n",
-        "share_footer" to "\nבהצלחה לכולם! 💪"
-    )
-
     fun savePeople(people: List<Person>) {
         storage.saveString("people", json.encodeToString(people))
     }
@@ -172,30 +162,30 @@ class ChoreRepository(
     }
 
     fun shareSchedule(schedule: Map<String, Map<String, List<String>>>, chores: List<Chore>) {
-        var text = HE_STRINGS["share_header"] ?: ""
+        var text = "📋 סידור עבודה לשבוע הקרוב:\n\n"
         val activeChores = chores.filter { it.isActive }
 
         DAY_KEYS.forEach { dayKey ->
-            text += (HE_STRINGS["share_day_format"] ?: "").format(DAYS_HE[dayKey] ?: "")
+            text += "*יום ${DAYS_HE[dayKey] ?: ""}*:\n"
             val dayData = schedule[dayKey] ?: return@forEach
             var tasksFound = false
 
             activeChores.forEach { chore ->
                 val assigned = dayData[chore.id]
                 if (!assigned.isNullOrEmpty()) {
-                    text += (HE_STRINGS["share_task_format"] ?: "").format(chore.label, assigned.joinToString(", "))
+                    text += "  - ${chore.label}: ${assigned.joinToString(", ")}\n"
                     tasksFound = true
                 } else if (chore.priority != Priority.LOW) {
-                    text += (HE_STRINGS["share_task_format"] ?: "").format(chore.label, HE_STRINGS["share_missing"] ?: "")
+                    text += "  - ${chore.label}: ⚠️ חסר תורן!\n"
                     tasksFound = true
                 }
             }
 
-            if (!tasksFound) text += HE_STRINGS["share_no_tasks"] ?: ""
+            if (!tasksFound) text += "  (אין משימות היום)\n"
             text += "\n"
         }
 
-        text += HE_STRINGS["share_footer"] ?: ""
+        text += "\nבהצלחה לכולם! 💪"
         sharer.shareSchedule(text)
     }
 }

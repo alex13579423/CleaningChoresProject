@@ -10,11 +10,23 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        // Essential for Kotlin/Wasm to find Node.js
+        
+        // Repository for Node.js
         ivy {
             url = "https://nodejs.org/dist"
             patternLayout {
                 artifact("v[revision]/[artifact]-v[revision]-[classifier].[ext]")
+            }
+            metadataSources {
+                artifact()
+            }
+        }
+        
+        // Repository for Yarn
+        ivy {
+            url = "https://github.com/yarnpkg/yarn/releases/download"
+            patternLayout {
+                artifact("v[revision]/[artifact]-v[revision].[ext]")
             }
             metadataSources {
                 artifact()

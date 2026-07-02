@@ -2,10 +2,10 @@ package com.example.myapp.viewmodel
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.ViewModel
 import com.example.myapp.data.*
+import kotlinx.datetime.Clock
 
-class ChoreViewModel(private val repository: ChoreRepository) : ViewModel() {
+class ChoreViewModel(private val repository: ChoreRepository) {
     private val _people = mutableStateOf(repository.getPeople())
     val people: State<List<Person>> = _people
 
@@ -18,9 +18,11 @@ class ChoreViewModel(private val repository: ChoreRepository) : ViewModel() {
     private val _schedule = mutableStateOf(repository.getSchedule())
     val schedule: State<Map<String, Map<String, List<String>>>?> = _schedule
 
+    private fun currentTimeMillis(): Long = Clock.System.now().toEpochMilliseconds()
+
     fun addPerson(name: String, gender: Gender, unavailableDays: List<String> = emptyList()) {
         val newPerson = Person(
-            id = System.currentTimeMillis(), 
+            id = currentTimeMillis(), 
             name = name, 
             gender = gender,
             unavailableDays = unavailableDays
@@ -108,7 +110,7 @@ class ChoreViewModel(private val repository: ChoreRepository) : ViewModel() {
 
     fun addCustomChore(label: String, priority: Priority) {
         val newChore = Chore(
-            id = "custom_${System.currentTimeMillis()}",
+            id = "custom_${currentTimeMillis()}",
             label = label,
             priority = priority,
             isActive = true
