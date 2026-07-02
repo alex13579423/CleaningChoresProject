@@ -13,7 +13,10 @@ kotlin {
             }
         }
     }
-    
+
+    // TEMPORARILY DISABLED for Gradle 9.6 compatibility.
+    // Uncomment this block ONLY after updating to Kotlin 2.1.0+ in your root build script.
+    /*
     wasmJs {
         browser {
             commonWebpackConfig {
@@ -22,6 +25,7 @@ kotlin {
         }
         binaries.executable()
     }
+    */
 
     sourceSets {
         commonMain.dependencies {
