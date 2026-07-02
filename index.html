@@ -3,21 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cleaning Chores</title>
+    <title>לוח תורנויות</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#6750A4">
     <style>
-        body { margin: 0; padding: 0; background-color: #ffffff; }
-        #app { width: 100vw; height: 100vh; }
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        #app { width: 100%; height: 100%; }
+
+        /* Loading indicator while Wasm is starting */
+        #loading {
+            font-family: sans-serif;
+            text-align: center;
+            direction: rtl;
+        }
     </style>
 </head>
 <body>
+    <div id="loading">טוען את האפליקציה...</div>
     <div id="app"></div>
-    <script src="composeApp.js"></script>
+
+    <script src="skiko.mjs" type="module"></script>
+    <script src="composeApp.js" type="module"></script>
+
     <script>
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('service-worker.js');
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('service-worker.js');
+            });
         }
+
+        // Hide loading once app is mounted
+        const observer = new MutationObserver((mutations) => {
+            if (document.getElementById('app').children.length > 0) {
+                document.getElementById('loading').style.display = 'none';
+                observer.disconnect();
+            }
+        });
+        observer.observe(document.getElementById('app'), { childList: true });
     </script>
 </body>
 </html>
