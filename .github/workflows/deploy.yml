@@ -23,10 +23,13 @@ jobs:
           java-version: '17'
 
       - name: Build Web Target
-        uses: gradle/actions/setup-gradle@v4 # Updated to v4 for Node.js/Wasm stability
+        uses: gradle/actions/setup-gradle@v4 # Updated to v4 for modern CI support
         with:
           gradle-version: 8.5
-          arguments: :app:wasmJsBrowserDistribution --no-configuration-cache --no-parallel --stacktrace
+          # Modern setup-gradle v4 does not use 'arguments'
+          
+      - name: Execute Gradle Build
+        run: gradle :app:wasmJsBrowserDistribution --no-configuration-cache --no-parallel --stacktrace
 
       - name: Prepare Deployment Folder
         run: |
