@@ -22,25 +22,26 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Build Web Target
-        uses: gradle/actions/setup-gradle@v4 # Updated to v4 for modern CI support
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: 8.5
-          # Modern setup-gradle v4 does not use 'arguments'
           
       - name: Execute Gradle Build
-        run: gradle :app:wasmJsBrowserDistribution --no-configuration-cache --no-parallel --stacktrace
+        # Try without the :app: prefix as a fallback to catch distribution tasks at root
+        run: gradle wasmJsBrowserDistribution --no-configuration-cache --no-parallel --stacktrace
 
       - name: Prepare Deployment Folder
         run: |
           mkdir -p deploy
           
-          # Check for production output and copy to deploy folder
-          if [ -d "app/build/dist/wasmJs/productionExecutable" ]; then
-            cp -rv app/build/dist/wasmJs/productionExecutable/* deploy/
-          else
-            echo "Searching for build output..."
-            find app/build/dist -name "*.js" -exec cp -v {} deploy/ \;
+          # Search for production output and copy to deploy folder
+          # This handles both root and module-level distribution layouts
+          find . -path "*/build/dist/wasmJs/productionExecutable" -type d -exec cp -rv {}/. deploy/ \;
+          
+          if [ -z "$(ls -A deploy)" ]; then
+             echo "Standard productionExecutable folder not found, searching for any .js output..."
+             find . -name "*.js" -path "*/build/dist/*" -exec cp -v {} deploy/ \;
           fi
           
           # Copy static web assets (index.html, manifest.json, etc.)
@@ -48,7 +49,7 @@ jobs:
             cp -rv web/* deploy/
           fi
           
-          # FIX 2: Prevent GitHub Pages from ignoring critical framework files
+          # Prevent GitHub Pages from ignoring critical framework files
           touch deploy/.nojekyll
 
       - name: Deploy to GitHub Pages
