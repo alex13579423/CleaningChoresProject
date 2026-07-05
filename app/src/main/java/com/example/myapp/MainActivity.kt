@@ -118,7 +118,7 @@ fun MainApp(viewModel: ChoreViewModel) {
                                 showPersonForm = true
                                 isFabExpanded = false
                             },
-                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
                             modifier = Modifier.padding(bottom = 8.dp)
                         ) {
                             Row(modifier = Modifier.padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -132,7 +132,7 @@ fun MainApp(viewModel: ChoreViewModel) {
                                 showChoreForm = true
                                 isFabExpanded = false
                             },
-                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
                             modifier = Modifier.padding(bottom = 8.dp)
                         ) {
                             Row(modifier = Modifier.padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -190,6 +190,11 @@ fun MainApp(viewModel: ChoreViewModel) {
                     onTogglePriority = { viewModel.togglePriorityEnabled(it) },
                     onAddChoreClick = { 
                         showChoreForm = true
+                        isFabExpanded = false
+                    },
+                    onAddPersonClick = {
+                        editingPerson = null
+                        showPersonForm = true
                         isFabExpanded = false
                     },
                     onGenerate = {

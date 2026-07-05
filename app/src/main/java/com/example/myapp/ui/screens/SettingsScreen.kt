@@ -32,6 +32,7 @@ fun SettingsScreen(
     priorityEnabled: Boolean,
     onTogglePriority: (Boolean) -> Unit,
     onAddChoreClick: () -> Unit,
+    onAddPersonClick: () -> Unit,
     onGenerate: () -> Unit
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
@@ -85,6 +86,31 @@ fun SettingsScreen(
                     onDelete = { onDeletePerson(person) },
                     onClick = { onEditPerson(person) }
                 )
+            }
+
+            item {
+                Button(
+                    onClick = onAddPersonClick,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    ),
+                    shape = MaterialTheme.shapes.medium,
+                    contentPadding = PaddingValues(vertical = 8.dp)
+                ) {
+                    Icon(
+                        Icons.Default.Add,
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        stringResource(R.string.add_person_button),
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
 
             item {

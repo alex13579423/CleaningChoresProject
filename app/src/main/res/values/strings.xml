@@ -57,6 +57,7 @@
     <string name="chores_title">משימות</string>
     <string name="chores_subtitle">הגדר אילו משימות לבצע ומה העדיפות שלהן</string>
     <string name="add_chore_button">הוסף משימה</string>
+    <string name="add_person_button">הוסף משתתף</string>
     <string name="add_person_fab">משתתף</string>
     <string name="add_chore_fab">משימה</string>
     <string name="set_all_medium">הכל בינוני</string>
