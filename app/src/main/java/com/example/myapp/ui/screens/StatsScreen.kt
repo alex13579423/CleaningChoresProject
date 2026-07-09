@@ -6,9 +6,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.res.stringResource
 import com.example.myapp.R
 import com.example.myapp.ui.components.WorkloadGraph
 
@@ -51,7 +51,9 @@ fun StatsScreen(
                 Spacer(Modifier.height(24.dp))
                 Card(
                     modifier = Modifier.padding(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f))
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+                    )
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text(

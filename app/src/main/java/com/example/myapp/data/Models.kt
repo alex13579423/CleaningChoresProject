@@ -7,6 +7,18 @@ enum class Gender {
     @SerializedName("F") FEMALE
 }
 
+enum class UserRole {
+    @SerializedName("MANAGER") MANAGER,
+    @SerializedName("WORKER") WORKER
+}
+
+data class SyncData(
+    val people: List<Person>,
+    val chores: List<Chore>,
+    val schedule: Map<String, Map<String, List<String>>>?,
+    val priorityEnabled: Boolean
+)
+
 enum class Priority(val level: Int) {
     LOW(1),
     MEDIUM(2),

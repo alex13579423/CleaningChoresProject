@@ -1,15 +1,10 @@
 package com.example.myapp.ui.components
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -18,7 +13,7 @@ import com.example.myapp.R
 import com.example.myapp.data.*
 import com.example.myapp.ui.theme.*
 
-@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ChoreItem(
     chore: Chore,
@@ -29,9 +24,9 @@ fun ChoreItem(
     onTogglePerson: (String) -> Unit
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
+        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
-        shape = RoundedCornerShape(16.dp)
+        shape = MaterialTheme.shapes.medium
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
@@ -55,15 +50,14 @@ fun ChoreItem(
                         
                         Surface(
                             color = priorityColor.copy(alpha = 0.2f),
-                            shape = RoundedCornerShape(4.dp),
+                            shape = MaterialTheme.shapes.extraSmall,
                             modifier = Modifier.padding(top = 4.dp)
                         ) {
                             Text(
                                 text = stringResource(priorityTextRes),
                                 color = priorityColor,
-                                fontSize = 10.sp,
-                                modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
-                                fontWeight = FontWeight.Medium
+                                style = MaterialTheme.typography.labelSmall,
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                             )
                         }
                     }
@@ -83,7 +77,6 @@ fun ChoreItem(
                             color = if (chore.priority == Priority.LOW) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.error
                         )
                     } else {
-                        // Display assigned people as integrated badges
                         FlowRow(
                             horizontalArrangement = Arrangement.spacedBy(4.dp),
                             modifier = Modifier.weight(1f, fill = false).padding(start = 16.dp)
@@ -91,8 +84,8 @@ fun ChoreItem(
                             assignedNames.forEach { name ->
                                 SuggestionChip(
                                     onClick = { },
-                                    label = { Text(name, fontSize = 12.sp) },
-                                    shape = RoundedCornerShape(12.dp)
+                                    label = { Text(name, style = MaterialTheme.typography.labelSmall) },
+                                    shape = MaterialTheme.shapes.small
                                 )
                             }
                         }
@@ -121,7 +114,7 @@ fun ChoreItem(
                             selected = isSelected,
                             onClick = { onTogglePerson(person.name) },
                             label = { Text(person.name) },
-                            shape = RoundedCornerShape(12.dp),
+                            shape = MaterialTheme.shapes.small,
                             colors = FilterChipDefaults.filterChipColors(
                                 selectedContainerColor = MaterialTheme.colorScheme.primary,
                                 selectedLabelColor = MaterialTheme.colorScheme.onPrimary

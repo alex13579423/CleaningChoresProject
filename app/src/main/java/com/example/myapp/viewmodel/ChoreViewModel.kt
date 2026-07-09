@@ -18,6 +18,33 @@ class ChoreViewModel(private val repository: ChoreRepository) : ViewModel() {
     private val _schedule = mutableStateOf(repository.getSchedule())
     val schedule: State<Map<String, Map<String, List<String>>>?> = _schedule
 
+    private val _userRole = mutableStateOf(repository.getUserRole())
+    val userRole: State<UserRole?> = _userRole
+
+    private val _isDarkMode = mutableStateOf(repository.isDarkMode())
+    val isDarkMode: State<Boolean> = _isDarkMode
+
+    fun setUserRole(role: UserRole?) {
+        _userRole.value = role
+        repository.saveUserRole(role)
+    }
+
+    fun toggleDarkMode(enabled: Boolean) {
+        _isDarkMode.value = enabled
+        repository.saveDarkMode(enabled)
+    }
+
+    fun getSyncJson(): String = repository.getSyncJson()
+
+    fun applySyncJson(json: String) {
+        if (repository.applySyncJson(json)) {
+            _people.value = repository.getPeople()
+            _chores.value = repository.getChores()
+            _schedule.value = repository.getSchedule()
+            _priorityEnabled.value = repository.isPriorityEnabled()
+        }
+    }
+
     fun addPerson(name: String, gender: Gender, unavailableDays: List<String> = emptyList()) {
         val newPerson = Person(
             id = System.currentTimeMillis(), 
@@ -87,7 +114,7 @@ class ChoreViewModel(private val repository: ChoreRepository) : ViewModel() {
                         Priority.LOW -> 1
                     }
                 } else {
-                    1 // All chores are equal
+                    1
                 }
                 assignedNames.forEach { name ->
                     stats[name] = (stats[name] ?: 0) + points
@@ -119,7 +146,6 @@ class ChoreViewModel(private val repository: ChoreRepository) : ViewModel() {
     }
 
     fun deleteChore(chore: Chore) {
-        // Don't delete mandatory chores if needed, but for simplicity:
         val newList = _chores.value.filter { it.id != chore.id }
         _chores.value = newList
         repository.saveChores(newList)

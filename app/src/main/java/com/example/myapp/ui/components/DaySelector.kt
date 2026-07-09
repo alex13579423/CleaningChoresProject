@@ -47,7 +47,6 @@ fun DaySelector(
                 DAY_KEYS.forEachIndexed { index, dayKey ->
                     val isSelected = selectedIndex == index
                     
-                    // Vertical separator before each item except the first one (on the right)
                     if (index > 0) {
                         Divider(
                             modifier = Modifier

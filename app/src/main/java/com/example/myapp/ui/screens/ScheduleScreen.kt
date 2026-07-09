@@ -3,7 +3,6 @@ package com.example.myapp.ui.screens
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Edit
@@ -12,7 +11,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -21,7 +19,6 @@ import com.example.myapp.R
 import com.example.myapp.data.*
 import com.example.myapp.ui.components.ChoreItem
 import com.example.myapp.ui.components.DaySelector
-import com.example.myapp.ui.theme.*
 
 @Composable
 fun ScheduleScreen(
@@ -29,6 +26,7 @@ fun ScheduleScreen(
     people: List<Person>,
     chores: List<Chore>,
     priorityEnabled: Boolean,
+    isManager: Boolean = true,
     onGenerate: () -> Unit,
     onShare: () -> Unit,
     onUpdateSchedule: (Map<String, Map<String, List<String>>>) -> Unit
@@ -81,19 +79,21 @@ fun ScheduleScreen(
                         color = MaterialTheme.colorScheme.primary
                     )
                     
-                    TextButton(
-                        onClick = { isEditing = !isEditing },
-                        colors = ButtonDefaults.textButtonColors(
-                            contentColor = if (isEditing) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
-                        )
-                    ) {
-                        Icon(
-                            imageVector = if (isEditing) Icons.Default.Check else Icons.Default.Edit, 
-                            contentDescription = null, 
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(Modifier.width(8.dp))
-                        Text(if (isEditing) stringResource(R.string.save_assignment) else stringResource(R.string.edit_assignment))
+                    if (isManager) {
+                        TextButton(
+                            onClick = { isEditing = !isEditing },
+                            colors = ButtonDefaults.textButtonColors(
+                                contentColor = if (isEditing) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+                            )
+                        ) {
+                            Icon(
+                                imageVector = if (isEditing) Icons.Default.Check else Icons.Default.Edit, 
+                                contentDescription = null, 
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(Modifier.width(8.dp))
+                            Text(if (isEditing) stringResource(R.string.save_assignment) else stringResource(R.string.edit_assignment))
+                        }
                     }
                 }
 
@@ -133,7 +133,7 @@ fun ScheduleScreen(
             Button(
                 onClick = onShare,
                 modifier = Modifier.padding(16.dp).fillMaxWidth().height(56.dp),
-                shape = RoundedCornerShape(16.dp),
+                shape = MaterialTheme.shapes.medium,
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
             ) {
                 Icon(Icons.Default.Share, contentDescription = null)

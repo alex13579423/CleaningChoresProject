@@ -11,6 +11,17 @@ class ChoreRepository(private val context: Context) {
     private val prefs = context.getSharedPreferences("duty_prefs", Context.MODE_PRIVATE)
     private val gson = Gson()
 
+    companion object {
+        @Volatile
+        private var INSTANCE: ChoreRepository? = null
+
+        fun getInstance(context: Context): ChoreRepository {
+            return INSTANCE ?: synchronized(this) {
+                INSTANCE ?: ChoreRepository(context.applicationContext).also { INSTANCE = it }
+            }
+        }
+    }
+
     fun savePeople(people: List<Person>) {
         prefs.edit().putString("people", gson.toJson(people)).apply()
     }
@@ -49,6 +60,39 @@ class ChoreRepository(private val context: Context) {
         return prefs.getBoolean("priority_enabled", true)
     }
 
+    fun saveUserRole(role: UserRole?) {
+        prefs.edit { putString("user_role", role?.name) }
+    }
+
+    fun getUserRole(): UserRole? {
+        val roleName = prefs.getString("user_role", null) ?: return null
+        return try { UserRole.valueOf(roleName) } catch (e: Exception) { null }
+    }
+
+    fun saveDarkMode(enabled: Boolean) {
+        prefs.edit { putBoolean("dark_mode", enabled) }
+    }
+
+    fun isDarkMode(): Boolean {
+        return prefs.getBoolean("dark_mode", true)
+    }
+
+    fun importSyncData(data: SyncData) {
+        savePeople(data.people)
+        saveChores(data.chores)
+        saveSchedule(data.schedule ?: emptyMap())
+        savePriorityEnabled(data.priorityEnabled)
+    }
+
+    fun exportSyncData(): SyncData {
+        return SyncData(
+            people = getPeople(),
+            chores = getChores(),
+            schedule = getSchedule(),
+            priorityEnabled = isPriorityEnabled()
+        )
+    }
+
     fun generateWeek(people: List<Person>, chores: List<Chore>, usePriorities: Boolean = true): Map<String, Map<String, List<String>>> {
         val activePeople = people.filter { it.active }
         val activeChores = chores.filter { it.isActive }
@@ -59,7 +103,7 @@ class ChoreRepository(private val context: Context) {
         val taskHistory = activePeople.associate { it.name to mutableMapOf<String, Int>() }.toMutableMap()
 
         activePeople.forEach { p ->
-            activeChores.forEach { chore -> taskHistory[p.name]!![chore.id] = 0 }
+            activeChores.forEach { chore -> taskHistory[p.name]?.set(chore.id, 0) }
         }
 
         val activeDaysForLowPriority = activeChores.filter { 
@@ -84,15 +128,16 @@ class ChoreRepository(private val context: Context) {
                 )).first()
                 
                 totalAssignments[selected.name] = (totalAssignments[selected.name] ?: 0) + 1
-                taskHistory[selected.name]!![taskId] = (taskHistory[selected.name]!![taskId] ?: 0) + 1
+                taskHistory[selected.name]?.let { history ->
+                    history[taskId] = (history[taskId] ?: 0) + 1
+                }
                 return selected
             }
 
-            // 1. Mandatory Gendered Tasks
             val malePool = available.filter { it.gender == Gender.MALE }
             if (activeChores.any { it.id == "toilet_m" }) {
                 pickPerson(malePool, "toilet_m")?.let {
-                    daySchedule["toilet_m"]!!.add(it.name)
+                    daySchedule["toilet_m"]?.add(it.name)
                     available.remove(it)
                 }
             }
@@ -100,24 +145,22 @@ class ChoreRepository(private val context: Context) {
             val femalePool = available.filter { it.gender == Gender.FEMALE }
             if (activeChores.any { it.id == "toilet_f" }) {
                 pickPerson(femalePool, "toilet_f")?.let {
-                    daySchedule["toilet_f"]!!.add(it.name)
+                    daySchedule["toilet_f"]?.add(it.name)
                     available.remove(it)
                 }
             }
 
-            // 2. Primary Assignments
             activeChores.filter { it.id != "toilet_m" && it.id != "toilet_f" }.forEach { chore ->
                 if (usePriorities && chore.priority == Priority.LOW && day !in (activeDaysForLowPriority[chore.id] ?: emptyList())) {
                     return@forEach
                 }
                 
                 pickPerson(available, chore.id)?.let {
-                    daySchedule[chore.id]!!.add(it.name)
+                    daySchedule[chore.id]?.add(it.name)
                     available.remove(it)
                 }
             }
 
-            // 3. Redistribute Idle People
             while (available.isNotEmpty()) {
                 var assignedInThisLoop = false
                 val sortedChores = if (usePriorities) {
@@ -140,7 +183,7 @@ class ChoreRepository(private val context: Context) {
                     }
 
                     pickPerson(pool, chore.id)?.let {
-                        daySchedule[chore.id]!!.add(it.name)
+                        daySchedule[chore.id]?.add(it.name)
                         available.remove(it)
                         assignedInThisLoop = true
                     }
@@ -187,5 +230,19 @@ class ChoreRepository(private val context: Context) {
         val shareIntent = Intent.createChooser(sendIntent, context.getString(R.string.share_chooser_title))
         shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         context.startActivity(shareIntent)
+    }
+
+    fun getSyncJson(): String {
+        return gson.toJson(exportSyncData())
+    }
+
+    fun applySyncJson(json: String): Boolean {
+        return try {
+            val data = gson.fromJson(json, SyncData::class.java)
+            importSyncData(data)
+            true
+        } catch (e: Exception) {
+            false
+        }
     }
 }
