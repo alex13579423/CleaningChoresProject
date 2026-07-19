@@ -13,7 +13,7 @@ import com.example.myapp.R
 import com.example.myapp.data.*
 import com.example.myapp.ui.theme.*
 
-@OptIn(ExperimentalLayoutApi::class)
+@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun ChoreItem(
     chore: Chore,

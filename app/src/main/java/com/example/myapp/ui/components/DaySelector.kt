@@ -3,11 +3,7 @@ package com.example.myapp.ui.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Divider
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
@@ -34,7 +30,7 @@ fun DaySelector(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            shape = RoundedCornerShape(16.dp),
+            shape = MaterialTheme.shapes.medium,
             color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
             tonalElevation = 2.dp
         ) {
@@ -62,9 +58,9 @@ fun DaySelector(
                             .weight(1f)
                             .fillMaxHeight()
                             .padding(4.dp)
-                            .clip(RoundedCornerShape(12.dp))
+                            .clip(MaterialTheme.shapes.small)
                             .background(
-                                if (isSelected) MaterialTheme.colorScheme.primary 
+                                if (isSelected) MaterialTheme.colorScheme.primaryContainer 
                                 else Color.Transparent
                             )
                             .clickable { onDaySelected(dayKey) },
@@ -74,7 +70,7 @@ fun DaySelector(
                             text = DAYS_HE[dayKey] ?: "",
                             fontSize = 13.sp,
                             fontWeight = if (isSelected) FontWeight.ExtraBold else FontWeight.Medium,
-                            color = if (isSelected) MaterialTheme.colorScheme.onPrimary 
+                            color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer
                                     else MaterialTheme.colorScheme.onSurfaceVariant,
                             maxLines = 1
                         )

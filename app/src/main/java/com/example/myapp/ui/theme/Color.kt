@@ -33,7 +33,7 @@ val PriorityMedium = Color(0xFFFFCC80)
 val PriorityLow = Color(0xFFA5D6A7)
 
 val MaleColor = Color(0xFF90CAF9)
-val FemaleColor = Color(0xFFBA68C8)
+val FemaleColor = Color(0xFF673AB7)
 
 val UnavailableBackground = Color(0xFF3E2723)
 val UnavailableText = Color(0xFFFFAB91)

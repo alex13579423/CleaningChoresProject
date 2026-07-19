@@ -44,6 +44,8 @@ import com.example.myapp.ui.components.QrScannerDialog
 import com.example.myapp.qr.data.manager.QrCryptoManager
 import com.example.myapp.qr.data.manager.QrImageAnalyzer
 import com.example.myapp.qr.presentation.util.QrGenerator
+import android.content.Intent
+import android.provider.Settings
 import android.nfc.NfcAdapter
 import android.widget.Toast
 
@@ -78,6 +80,11 @@ class MainActivity : ComponentActivity() {
     fun checkNfcEnabled(): Boolean {
         val nfcAdapter = NfcAdapter.getDefaultAdapter(this)
         return nfcAdapter != null && nfcAdapter.isEnabled
+    }
+
+    fun openNfcSettings() {
+        val intent = Intent(Settings.ACTION_NFC_SETTINGS)
+        startActivity(intent)
     }
 }
 
@@ -231,14 +238,14 @@ fun MainApp(
                         if (context.checkNfcEnabled()) {
                             mainViewModel.setShowNfcScanner(true)
                         } else {
-                            Toast.makeText(context, context.getString(R.string.nfc_disabled), Toast.LENGTH_SHORT).show()
+                            context.openNfcSettings()
                         }
                     },
                     onGenerateNfc = {
                         if (context.checkNfcEnabled()) {
                             mainViewModel.setShowNfcSharing(true)
                         } else {
-                            Toast.makeText(context, context.getString(R.string.nfc_disabled), Toast.LENGTH_SHORT).show()
+                            context.openNfcSettings()
                         }
                     }
                 )
