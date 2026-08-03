@@ -4,6 +4,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import com.example.myapp.data.*
+import kotlin.collections.forEach
 
 class ChoreViewModel(private val repository: ChoreRepository) : ViewModel() {
     private val _people = mutableStateOf(repository.getPeople())
@@ -112,6 +113,7 @@ class ChoreViewModel(private val repository: ChoreRepository) : ViewModel() {
                         Priority.HIGH -> 3
                         Priority.MEDIUM -> 2
                         Priority.LOW -> 1
+                        null -> 2
                     }
                 } else {
                     1

@@ -16,13 +16,13 @@ data class SyncData(
     val people: List<Person>,
     val chores: List<Chore>,
     val schedule: Map<String, Map<String, List<String>>>?,
-    val priorityEnabled: Boolean
+    val priorityEnabled: Boolean,
 )
 
 enum class Priority(val level: Int) {
-    LOW(1),
-    MEDIUM(2),
-    HIGH(3)
+    @SerializedName("1") LOW(1),
+    @SerializedName("2") MEDIUM(2),
+    @SerializedName("3") HIGH(3)
 }
 
 data class Person(
@@ -36,7 +36,7 @@ data class Person(
 data class Chore(
     val id: String,
     val label: String,
-    val priority: Priority,
+    val priority: Priority? = Priority.MEDIUM,
     val genderConstraint: Gender? = null,
     val isActive: Boolean = true
 )

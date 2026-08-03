@@ -42,7 +42,8 @@ fun ChoreItem(
                     )
                     
                     if (priorityEnabled) {
-                        val (priorityTextRes, priorityColor) = when(chore.priority) {
+                        val currentPriority = chore.priority ?: Priority.MEDIUM
+                        val (priorityTextRes, priorityColor) = when(currentPriority) {
                             Priority.HIGH -> R.string.priority_hard to PriorityHigh
                             Priority.MEDIUM -> R.string.priority_medium to PriorityMedium
                             Priority.LOW -> R.string.priority_easy to PriorityLow
@@ -64,17 +65,18 @@ fun ChoreItem(
                 }
 
                 if (!isEditing) {
+                    val currentPriority = chore.priority ?: Priority.MEDIUM
                     if (assignedNames.isEmpty()) {
                         val missingText = when {
                             chore.id == "toilet_m" -> stringResource(R.string.missing_male)
                             chore.id == "toilet_f" -> stringResource(R.string.missing_female)
-                            chore.priority == Priority.LOW -> stringResource(R.string.not_required_today)
+                            currentPriority == Priority.LOW -> stringResource(R.string.not_required_today)
                             else -> stringResource(R.string.missing_personnel)
                         }
                         Text(
                             text = missingText,
                             style = MaterialTheme.typography.labelMedium,
-                            color = if (chore.priority == Priority.LOW) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.error
+                            color = if (currentPriority == Priority.LOW) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.error
                         )
                     } else {
                         FlowRow(

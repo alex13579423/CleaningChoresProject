@@ -2,6 +2,7 @@ package com.example.myapp.data
 
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import com.example.myapp.R
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -89,7 +90,7 @@ class ChoreRepository(private val context: Context) {
             people = getPeople(),
             chores = getChores(),
             schedule = getSchedule(),
-            priorityEnabled = isPriorityEnabled()
+            priorityEnabled = isPriorityEnabled(),
         )
     }
 
@@ -236,12 +237,19 @@ class ChoreRepository(private val context: Context) {
         return gson.toJson(exportSyncData())
     }
 
-    fun applySyncJson(json: String): Boolean {
+        fun applySyncJson(json: String): Boolean {
         return try {
+            Log.d("ChoreRepository", "Applying Sync JSON: $json")
             val data = gson.fromJson(json, SyncData::class.java)
+            if (data == null) {
+                Log.e("ChoreRepository", "Parsed data is null")
+                return false
+            }
             importSyncData(data)
+            Log.i("ChoreRepository", "Successfully imported sync data")
             true
         } catch (e: Exception) {
+            Log.e("ChoreRepository", "Failed to parse Sync JSON", e)
             false
         }
     }

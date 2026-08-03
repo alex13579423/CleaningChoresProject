@@ -14,9 +14,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
+import com.example.myapp.qr.data.manager.ChunkStreamAnalyzer
 import com.example.myapp.qr.data.manager.QrCryptoManager
 import com.example.myapp.qr.data.manager.QrImageAnalyzer
-import com.example.myapp.qr.data.manager.RaptorQStreamAnalyzer
 import java.util.concurrent.Executors
 
 private const val TAG = "ScannerDebugger"
@@ -30,14 +30,16 @@ fun ScannerQR(
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
-
     val mainExecutor = remember { ContextCompat.getMainExecutor(context) }
 
-    val analyzer = remember(onDataReceived, onProgress) {
-        RaptorQStreamAnalyzer(
+    val currentOnDataReceived by rememberUpdatedState(onDataReceived)
+    val currentOnProgress by rememberUpdatedState(onProgress)
+
+    val analyzer = remember {
+        ChunkStreamAnalyzer(
             mainExecutor = mainExecutor,
-            onProgress = onProgress,
-            onDataReceived = onDataReceived,
+            onProgress = { currentOnProgress(it) },
+            onDataReceived = { currentOnDataReceived(it) },
             qrImageAnalyzer = qrImageAnalyzer,
             qrCryptoManager = qrCryptoManager,
         )
@@ -60,14 +62,16 @@ fun ScannerQR(
             cameraProviderFuture.addListener({
                 val cameraProvider = cameraProviderFuture.get()
 
+                val preview = Preview.Builder().build().also {
+                    it.surfaceProvider = previewView.surfaceProvider
+                }
+
                 val analysis = ImageAnalysis.Builder()
                     .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                    .build()
+                    .build().also {
+                        it.setAnalyzer(Executors.newSingleThreadExecutor(), analyzer)
+                    }
 
-                analysis.setAnalyzer(Executors.newSingleThreadExecutor(), analyzer)
-
-                val preview = Preview.Builder().build()
-                preview.setSurfaceProvider(previewView.surfaceProvider)
                 val selector = CameraSelector.DEFAULT_BACK_CAMERA
 
                 try {
@@ -81,7 +85,11 @@ fun ScannerQR(
                 } catch (e: Exception) {
                     Log.e(TAG, "Binding failed", e)
                 }
-            }, ContextCompat.getMainExecutor(context))
+            }, mainExecutor)
+        },
+        onRelease = {
+            val cameraProvider = ProcessCameraProvider.getInstance(context).get()
+            cameraProvider.unbindAll()
         }
     )
 }

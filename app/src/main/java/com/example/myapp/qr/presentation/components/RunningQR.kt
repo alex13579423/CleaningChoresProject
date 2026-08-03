@@ -5,11 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.produceState
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.FilterQuality
@@ -20,7 +16,6 @@ import androidx.compose.ui.layout.ContentScale
 import com.example.myapp.qr.data.manager.QrCryptoManager
 import com.example.myapp.qr.data.util.CompressionUtils
 import com.example.myapp.qr.presentation.util.QrGenerator
-import io.github.andreypfau.raptorq.Encoder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlin.time.Duration.Companion.seconds
@@ -31,31 +26,28 @@ fun RunningQR(
     modifier: Modifier = Modifier,
     qrCryptoManager: QrCryptoManager,
     qrGenerator: QrGenerator,
-    frameRate: Int = 24,
+    frameRate: Int = 5,
     qrColor: Color = MaterialTheme.colorScheme.primary,
     qrBackgroundColor: Color = Color.White
 ) {
     val frameRateMs = 1.seconds.inWholeMilliseconds / frameRate
 
-    val encoderState = produceState<Pair<Encoder, Int>?>(initialValue = null, rawJsonData) {
+    val encryptedState = produceState<ByteArray?>(initialValue = null, rawJsonData) {
         value = withContext(Dispatchers.Default) {
             val compressed = CompressionUtils.compressString(rawJsonData)
-            val encrypted = qrCryptoManager.encryptBytes(compressed)
-            Pair(Encoder(data = encrypted, symbolSize = 128), encrypted.size)
+            qrCryptoManager.encryptBytes(compressed)
         }
     }
 
-    val encoderPair = encoderState.value
+    val encryptedData = encryptedState.value
 
-    if (encoderPair != null) {
-        val (encoder, originalEncryptedSize) = encoderPair
+    if (encryptedData != null) {
         val fgColorInt = qrColor.toArgb()
         val bgColorInt = qrBackgroundColor.toArgb()
 
-        val qrFlow = remember(encoder) {
-            qrGenerator.generateQrStream(
-                encoder = encoder,
-                originalEncryptedSize = originalEncryptedSize,
+        val qrFlow = remember(encryptedData) {
+            qrGenerator.generateChunkedStream(
+                encryptedData = encryptedData,
                 frameRateMs = frameRateMs,
                 fgColorInt = fgColorInt,
                 bgColorInt = bgColorInt
