@@ -1,11 +1,16 @@
 import { gzip, ungzip } from 'pako';
 
 export const compressString = (data: string): Uint8Array => {
-  return gzip(data);
+  // Use TextEncoder to safely convert the string to bytes before compressing
+  const encoder = new TextEncoder();
+  return gzip(encoder.encode(data));
 };
 
 export const decompressGzip = (data: Uint8Array): string => {
-  return ungzip(data, { to: 'string' });
+  // Use TextDecoder instead of the deprecated { to: 'string' } option
+  const decompressed = ungzip(data);
+  const decoder = new TextDecoder();
+  return decoder.decode(decompressed);
 };
 
 const getCryptoKey = async (): Promise<CryptoKey> => {
@@ -27,10 +32,11 @@ export const encryptBytes = async (plaintext: Uint8Array): Promise<Uint8Array> =
   const key = await getCryptoKey();
   const iv = crypto.getRandomValues(new Uint8Array(12));
 
+  // Cast plaintext to unknown then BufferSource to satisfy strict TS checks
   const ciphertext = await crypto.subtle.encrypt(
     { name: "AES-GCM", iv: iv, tagLength: 128 },
     key,
-    plaintext
+    plaintext as unknown as BufferSource
   );
 
   const result = new Uint8Array(12 + ciphertext.byteLength);
@@ -45,10 +51,11 @@ export const decryptBytes = async (combined: Uint8Array): Promise<Uint8Array> =>
   const iv = combined.slice(0, 12);
   const ciphertext = combined.slice(12);
 
+  // Cast ciphertext to unknown then BufferSource here as well
   const decrypted = await crypto.subtle.decrypt(
     { name: "AES-GCM", iv: iv, tagLength: 128 },
     key,
-    ciphertext
+    ciphertext as unknown as BufferSource
   );
 
   return new Uint8Array(decrypted);
