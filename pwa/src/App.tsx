@@ -576,6 +576,8 @@ const StatsScreen = ({ store }: { store: any }) => {
 
     const maxScore = Math.max(...Object.values(stats), 1);
 
+    const totalScore = Object.values(stats).reduce((sum, current) => sum + current, 0) || 1;
+
     return (
         <div className="space-y-10 animate-in fade-in slide-in-from-bottom-10 duration-500">
             <div className="px-2">
@@ -590,25 +592,29 @@ const StatsScreen = ({ store }: { store: any }) => {
                 </div>
             ) : (
                 <div className="space-y-5">
-                    {Object.entries(stats).sort((a, b) => b[1] - a[1]).map(([name, score]) => (
-                        <div key={name} className="p-6 rounded-[32px] border border-outline/5 bg-surface shadow-xl relative overflow-hidden group">
-                            <div className="absolute left-0 top-0 bottom-0 bg-primary/5 transition-all duration-1000 group-hover:bg-primary/10" style={{ width: `${(score / maxScore) * 100}%` }} />
-                            <div className="relative flex items-center justify-between">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 rounded-2xl bg-primary-container flex items-center justify-center text-on-primary-container text-lg font-black shadow-inner">{name.charAt(0)}</div>
-                                    <span className="font-black text-xl text-on-surface">{name}</span>
-                                </div>
-                                <div className="flex items-center gap-6">
-                                    <div className="w-40 h-3 bg-surface-variant rounded-full overflow-hidden shadow-inner hidden md:block">
-                                        <div className="h-full bg-primary transition-all duration-1000 ease-out rounded-full shadow-[0_0_15px_rgba(var(--md-sys-color-primary),0.6)]" style={{ width: `${(score / maxScore) * 100}%` }} />
+                    {Object.entries(stats).sort((a, b) => b[1] - a[1]).map(([name, score]) => {
+                        const percentage = Math.round((score / totalScore) * 100);
+
+                        return (
+                            <div key={name} className="p-6 rounded-[32px] border border-outline/5 bg-surface shadow-xl relative overflow-hidden group">
+                                <div className="absolute left-0 top-0 bottom-0 bg-primary/5 transition-all duration-1000 group-hover:bg-primary/10" style={{ width: `${(score / maxScore) * 100}%` }} />
+                                <div className="relative flex items-center justify-between">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 rounded-2xl bg-primary-container flex items-center justify-center text-on-primary-container text-lg font-black shadow-inner">{name.charAt(0)}</div>
+                                        <span className="font-black text-xl text-on-surface">{name}</span>
                                     </div>
-                                    <div className="px-5 py-2 bg-primary-container rounded-2xl shadow-md border border-primary/10">
-                                        <span className="font-mono font-black text-xl text-on-primary-container">{score}</span>
+                                    <div className="flex items-center gap-6">
+                                        <div className="w-40 h-3 bg-surface-variant rounded-full overflow-hidden shadow-inner hidden md:block">
+                                            <div className="h-full bg-primary transition-all duration-1000 ease-out rounded-full shadow-[0_0_15px_rgba(var(--md-sys-color-primary),0.6)]" style={{ width: `${(score / maxScore) * 100}%` }} />
+                                        </div>
+                                        <div className="px-5 py-2 bg-primary-container rounded-2xl shadow-md border border-primary/10">
+                                            <span className="font-mono font-black text-xl text-on-primary-container">{percentage}%</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
             )}
 
@@ -616,10 +622,10 @@ const StatsScreen = ({ store }: { store: any }) => {
                 <div className="absolute -top-4 -right-4 p-8 opacity-5 text-9xl">💡</div>
                 <h3 className="font-black text-xl mb-4 text-on-surface flex items-center gap-2">
                     <span>💡</span>
-                    <span>איך מחושב הניקוד?</span>
+                    <span>איך מחושב האחוז?</span>
                 </h3>
                 <p className="text-base text-on-surface-variant leading-relaxed font-medium opacity-90">
-                    כל משימה מקבלת ניקוד לפי רמת הקושי שלה: <span className="font-black text-error">קשה (3)</span>, <span className="font-black text-[#FFA000]">בינוני (2)</span>, <span className="font-black text-secondary">קל (1)</span>. הגרף מראה את סך הניקוד המצטבר.
+                    כל משימה מקבלת ניקוד לפי רמת הקושי שלה: <span className="font-black text-error">קשה (3)</span>, <span className="font-black text-[#FFA000]">בינוני (2)</span>, <span className="font-black text-secondary">קל (1)</span>. אנו סוכמים את כל המשימות, והאחוז מציג את החלק היחסי של העובד מתוך סך העומס השבועי של כולם.
                 </p>
             </div>
         </div>
